@@ -96,7 +96,7 @@ resource "aws_default_security_group" "default-sg" {
   egress {
     from_port = 0
     to_port = 0
-    protoco  = "-1"
+    protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
     prefix_list_ids = []
   }
@@ -104,4 +104,25 @@ resource "aws_default_security_group" "default-sg" {
   tags = {
     "Name" = "${var.env_prefix}-default-sg"
   }
+}
+
+# Fetch Amazon Machine Image for EC2 Instance
+data "aws_ami" "latest-amazon-linux-image" {
+  most_recent = true
+  owners = ["amazon"]
+  filter {
+    name = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+  filter{
+    name="virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+output "aws_ami_id" {
+  value = data.aws_ami.latest-amazon-linux-image.id
+}
+resource "aws_instance" "myapp-server" {
+  ami = data.aws_ami.latest-amazon-linux-image.id
 }
