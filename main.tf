@@ -11,6 +11,7 @@ variable avail_zone {}
 variable env_prefix {}
 variable "AWS_ACCESS_KEY" {}
 variable "AWS_SECRET_KEY" {}
+variable "my_ip" {}
 
 # Creating VPC
 resource "aws_vpc" "myapp-vpc"{
@@ -71,4 +72,36 @@ resource "aws_default_route_table" "main-rtb" {
     Name= "${var.env_prefix}-main-rtb"
   }
 
+}
+
+# Creating security Group
+resource "aws_default_security_group" "default-sg" {
+  #name = "myapp-sg"
+  vpc_id = aws_vpc.myapp-vpc.id
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = [var.my_ip]
+  }
+
+  ingress {
+    from_port = 8080
+    to_port = 8080
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protoco  = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    prefix_list_ids = []
+  }
+
+  tags = {
+    "Name" = "${var.env_prefix}-default-sg"
+  }
 }
